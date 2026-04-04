@@ -30,7 +30,13 @@ jobs:
             clang-22 libclang-22-dev libclang-common-22-dev \
             libmlir-22-dev mlir-22-tools \
             lld-22 libclang-rt-22-dev \
-            cmake ninja-build
+            cmake ninja-build ccache
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: arcanum-${{ github.job }}
+          max-size: 500M
 
       - name: Set up alternatives
         run: |
