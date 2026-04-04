@@ -1,0 +1,48 @@
+name: Arcanum CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'arcanum/**'
+      - '.github/workflows/arcanum-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'arcanum/**'
+      - '.github/workflows/arcanum-ci.yml'
+
+jobs:
+  build:
+    name: CMake Build
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install LLVM 22 / MLIR
+        run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          sudo add-apt-repository "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-22 main"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            llvm-22 llvm-22-dev llvm-22-tools \
+            clang-22 libclang-22-dev libclang-common-22-dev \
+            libmlir-22-dev mlir-22-tools \
+            lld-22 libclang-rt-22-dev \
+            cmake ninja-build
+
+      - name: Set up alternatives
+        run: |
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-22 100
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-22 100
+          sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-22 100
+          sudo update-alternatives --install /usr/bin/mlir-opt mlir-opt /usr/bin/mlir-opt-22 100
+
+      - name: Configure (dev preset)
+        working-directory: arcanum
+        run: cmake --preset dev
+
+      - name: Configure (release preset)
+        working-directory: arcanum
+        run: cmake --preset release
