@@ -1,0 +1,106 @@
+FROM ubuntu:24.04
+
+ARG LLVM_VERSION=22
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# ============================================================
+# Base system packages
+# ============================================================
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release \
+    software-properties-common \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# ============================================================
+# LLVM / Clang / MLIR (from apt.llvm.org)
+# ============================================================
+RUN wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc \
+    && add-apt-repository "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-${LLVM_VERSION} main" \
+    && apt-get update && apt-get install -y --no-install-recommends \
+    # LLVM core
+    llvm-${LLVM_VERSION} \
+    llvm-${LLVM_VERSION}-dev \
+    llvm-${LLVM_VERSION}-tools \
+    # Clang
+    clang-${LLVM_VERSION} \
+    clang-tools-${LLVM_VERSION} \
+    clang-format-${LLVM_VERSION} \
+    clang-tidy-${LLVM_VERSION} \
+    libclang-${LLVM_VERSION}-dev \
+    libclang-common-${LLVM_VERSION}-dev \
+    # MLIR
+    libmlir-${LLVM_VERSION}-dev \
+    mlir-${LLVM_VERSION}-tools \
+    # LLD linker
+    lld-${LLVM_VERSION} \
+    # Compiler-RT
+    libclang-rt-${LLVM_VERSION}-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set LLVM as default
+RUN update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-${LLVM_VERSION}   100 \
+    && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-${LLVM_VERSION} 100 \
+    && update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-${LLVM_VERSION} 100 \
+    && update-alternatives --install /usr/bin/clang-tidy   clang-tidy   /usr/bin/clang-tidy-${LLVM_VERSION}   100 \
+    && update-alternatives --install /usr/bin/lld     lld     /usr/bin/lld-${LLVM_VERSION}     100 \
+    && update-alternatives --install /usr/bin/ld.lld  ld.lld  /usr/bin/ld.lld-${LLVM_VERSION}  100 \
+    && update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-${LLVM_VERSION} 100 \
+    && update-alternatives --install /usr/bin/mlir-opt mlir-opt /usr/bin/mlir-opt-${LLVM_VERSION} 100 \
+    && update-alternatives --install /usr/bin/mlir-translate mlir-translate /usr/bin/mlir-translate-${LLVM_VERSION} 100
+
+# ============================================================
+# Build tools
+# ============================================================
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cmake \
+    ninja-build \
+    ccache \
+    pkg-config \
+    make \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# ============================================================
+# Google Test
+# ============================================================
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgtest-dev \
+    googletest \
+    && rm -rf /var/lib/apt/lists/*
+
+# ============================================================
+# Why3 + SMT solvers (system-level dependencies)
+# ============================================================
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    opam \
+    z3 \
+    libgmp-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# ============================================================
+# Why3 via opam (root install for CI)
+# ============================================================
+RUN opam init --auto-setup --disable-sandboxing \
+    && eval $(opam env) \
+    && opam install -y why3 alt-ergo \
+    && eval $(opam env) \
+    && why3 config detect \
+    && rm -rf /tmp/opam-* /tmp/camlobj*
+
+# ============================================================
+# Locale
+# ============================================================
+RUN apt-get update && apt-get install -y --no-install-recommends locales \
+    && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+ENV CC=clang
+ENV CXX=clang++

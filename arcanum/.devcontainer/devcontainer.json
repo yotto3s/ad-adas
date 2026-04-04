@@ -1,0 +1,60 @@
+{
+  "name": "Arcanum Development",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "LLVM_VERSION": "22"
+    }
+  },
+  "initializeCommand": "docker build -t arcanum-ci:latest -f .devcontainer/Dockerfile.ci --build-arg LLVM_VERSION=22 . && bash .devcontainer/init.sh",
+  "runArgs": [
+    "--cap-add=SYS_PTRACE",
+    "--security-opt", "seccomp=unconfined"
+  ],
+
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "22" },
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
+  },
+
+  "updateRemoteUserUID": true,
+
+  "mounts": [
+    "source=${localEnv:HOME}/.claude,target=/home/dev/.claude,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.gitconfig,target=/home/dev/.gitconfig,type=bind,consistency=cached,readonly",
+    "source=${localEnv:HOME}/.ssh,target=/home/dev/.ssh,type=bind,consistency=cached,readonly"
+  ],
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "cmake.generator": "Ninja",
+        "cmake.buildDirectory": "${workspaceFolder}/build",
+        "editor.formatOnSave": true,
+        "clangd.path": "/usr/bin/clangd-22",
+        "clangd.arguments": [
+          "--background-index",
+          "--clang-tidy",
+          "--header-insertion=iwyu",
+          "--completion-style=detailed"
+        ],
+        "files.associations": {
+          "*.td": "tablegen"
+        }
+      },
+      "extensions": [
+        "llvm-vs-code-extensions.vscode-clangd",
+        "ms-vscode.cmake-tools",
+        "twxs.cmake",
+        "vadimcn.vscode-lldb",
+        "mhutchie.git-graph",
+        "eamodio.gitlens",
+        "EditorConfig.EditorConfig"
+      ]
+    }
+  },
+
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "remoteUser": "dev"
+}
