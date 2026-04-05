@@ -13,9 +13,14 @@ module {
       %not_c1 = ecsl.constraint.not %c1
       %and_result = ecsl.constraint.and {
         %inner = arith.constant 5 : i32
-        %cmp = ecsl.constraint.cmp eq, unsigned, %inner, %inner : i32
+        %c3 = ecsl.constraint.cmp gt, signed, %b, %inner : i32
+        %c4 = ecsl.constraint.cmp lt, signed, %inner, %b : i32
+        %c5 = ecsl.constraint.not %c3
       }
       %or_result = ecsl.constraint.or {
+        %zero = arith.constant 0 : i32
+        %c6 = ecsl.constraint.cmp eq, unsigned, %a, %zero : i32
+        %c7 = ecsl.constraint.cmp ne, unsigned, %b, %zero : i32
       }
       ecsl.clause_yield %c1, %c2, %not_c1, %and_result, %or_result
           : i1, i1, i1, i1, i1
