@@ -75,6 +75,7 @@ def ECSL_FuncOp : ECSL_Op<"func",
       `ensures` $ensures_region
       `body` $body
   }];
+  let hasVerifier = 1;
 }
 
 //===----------------------------------------------------------------------===//
@@ -149,6 +150,7 @@ def ECSL_ConstraintNotOp : ECSL_Op<"constraint.not", [Pure]> {
   let arguments = (ins I1:$operand);
   let results = (outs I1:$result);
   let assemblyFormat = "$operand attr-dict";
+  let hasVerifier = 1;
 }
 
 //===----------------------------------------------------------------------===//
@@ -161,6 +163,7 @@ class ECSL_ConstraintNaryOp<string mnemonic>
   let regions = (region SizedRegion<1>:$body);
   let results = (outs I1:$result);
   let assemblyFormat = "$body attr-dict";
+  let hasVerifier = 1;
 }
 
 def ECSL_ConstraintAndOp : ECSL_ConstraintNaryOp<"constraint.and"> {
