@@ -16,6 +16,9 @@ jobs:
   build:
     name: CMake Build
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
     container:
       image: ghcr.io/${{ github.repository }}/arcanum-ci:latest
 
@@ -32,6 +35,14 @@ jobs:
         working-directory: arcanum
         run: cmake --preset dev
 
+      - name: Build (dev preset)
+        working-directory: arcanum
+        run: cmake --build --preset dev
+
       - name: Configure (release preset)
         working-directory: arcanum
         run: cmake --preset release
+
+      - name: Build (release preset)
+        working-directory: arcanum
+        run: cmake --build --preset release

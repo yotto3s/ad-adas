@@ -15,9 +15,15 @@ set(_mlir_search_paths
   /usr/lib/llvm-22/lib/cmake/mlir
   /usr/local/lib/cmake/mlir
   /opt/llvm-22/lib/cmake/mlir
-  $ENV{LLVM_DIR}/../mlir
-  $ENV{MLIR_DIR}
 )
+
+if(DEFINED ENV{LLVM_DIR} AND NOT "$ENV{LLVM_DIR}" STREQUAL "")
+  list(APPEND _mlir_search_paths "$ENV{LLVM_DIR}/../mlir")
+endif()
+
+if(DEFINED ENV{MLIR_DIR} AND NOT "$ENV{MLIR_DIR}" STREQUAL "")
+  list(APPEND _mlir_search_paths "$ENV{MLIR_DIR}")
+endif()
 
 find_package(MLIR CONFIG
   HINTS ${_mlir_search_paths}
