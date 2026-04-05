@@ -4,6 +4,7 @@
 
 using namespace ecsl;
 
+#include "ecsl/IR/ECSLEnums.cpp.inc"
 #include "ecsl/IR/ECSLOpsDialect.cpp.inc"
 
 void ECSLDialect::initialize() {
