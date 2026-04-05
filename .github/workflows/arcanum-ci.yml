@@ -44,6 +44,53 @@ jobs:
         working-directory: arcanum
         run: cmake --build --preset ${{ matrix.preset }}
 
+  clang-tidy:
+    name: clang-tidy
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ghcr.io/${{ github.repository }}/arcanum-ci:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: arcanum-clang-tidy
+          max-size: 2G
+
+      - name: Configure + generate TableGen headers
+        working-directory: arcanum
+        run: |
+          cmake --preset dev
+          cmake --build --preset dev --target MLIRECSL
+
+      - name: Run clang-tidy
+        working-directory: arcanum
+        run: |
+          find . -type f -name '*.cpp' -not -path './build/*' -print0 \
+            | xargs -0 --no-run-if-empty \
+                clang-tidy -p build/dev --quiet --warnings-as-errors='*'
+
+  header-guards:
+    name: Header Guards
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ghcr.io/${{ github.repository }}/arcanum-ci:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate include guards
+        working-directory: arcanum
+        run: ./scripts/check-include-guards.sh
+
   docs:
     name: Doxygen Docs
     needs: build
