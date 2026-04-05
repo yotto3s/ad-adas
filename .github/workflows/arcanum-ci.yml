@@ -129,7 +129,6 @@ jobs:
 
   docs:
     name: Doxygen Docs
-    needs: build
     runs-on: ubuntu-24.04
     permissions:
       contents: read
