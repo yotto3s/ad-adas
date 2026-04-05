@@ -8,13 +8,22 @@
 # Usage:
 #   cmake --build <build-dir> --target docs
 
-find_package(Doxygen QUIET)
+find_package(Doxygen QUIET OPTIONAL_COMPONENTS dot)
 
 if(NOT DOXYGEN_FOUND)
   message(STATUS
     "Doxygen not found; skipping 'docs' target. "
     "Install doxygen to enable documentation generation.")
   return()
+endif()
+
+if(TARGET Doxygen::dot)
+  set(ARCANUM_DOXYGEN_HAVE_DOT "YES")
+  get_filename_component(ARCANUM_DOXYGEN_DOT_PATH
+    "${DOXYGEN_DOT_EXECUTABLE}" DIRECTORY)
+else()
+  set(ARCANUM_DOXYGEN_HAVE_DOT "NO")
+  set(ARCANUM_DOXYGEN_DOT_PATH "")
 endif()
 
 set(ARCANUM_DOXYGEN_INPUT "${PROJECT_SOURCE_DIR}")
@@ -34,4 +43,5 @@ add_custom_target(docs
 )
 
 message(STATUS "Doxygen found: ${DOXYGEN_EXECUTABLE} "
-  "(run 'cmake --build <dir> --target docs')")
+  "(HAVE_DOT=${ARCANUM_DOXYGEN_HAVE_DOT}, "
+  "run 'cmake --build <dir> --target docs')")
