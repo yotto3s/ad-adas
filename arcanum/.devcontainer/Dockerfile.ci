@@ -74,6 +74,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ============================================================
+# Linters
+# ============================================================
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    codespell \
+    && rm -rf /var/lib/apt/lists/*
+
+# ============================================================
 # Google Test
 # ============================================================
 RUN apt-get update && apt-get install -y --no-install-recommends \
