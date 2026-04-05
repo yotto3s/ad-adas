@@ -1,9 +1,3 @@
-//===- ECSLDialect.cpp - ECSL dialect implementation ----------------------===//
-//
-// Implements the ECSL MLIR dialect. No operations are registered yet.
-//
-//===----------------------------------------------------------------------===//
-
 #include "ecsl/IR/ECSLDialect.h"
 
 #include "ecsl/IR/ECSLOps.h" // IWYU pragma: keep (used via GET_OP_LIST)

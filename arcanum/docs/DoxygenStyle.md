@@ -109,8 +109,9 @@ void loadInto(mlir::MLIRContext &ctx);
 ### Where docs live
 
 Public-API documentation belongs in **headers**, not .cpp files.
-Implementation-detail comments in .cpp files use plain `//` (not
-`///`) so Doxygen skips them.
+Doxygen's `FILE_PATTERNS` only includes `*.h`, `*.hpp`, `*.td`, and
+`*.md`; .cpp files are not processed. Use plain `//` comments in .cpp
+files for implementation notes.
 
 ## Deviations from LLVM
 

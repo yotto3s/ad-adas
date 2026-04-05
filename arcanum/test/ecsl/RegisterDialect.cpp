@@ -1,9 +1,5 @@
-//===- RegisterDialect.cpp - ECSL dialect registration smoke test ---------===//
-//
-// Minimal smoke test that verifies the ECSL dialect can be loaded into
-// an MLIRContext and retrieved by its registered name.
-//
-//===----------------------------------------------------------------------===//
+// Smoke test: loads the ECSL dialect into an MLIRContext and verifies
+// its registered namespace.
 
 #include "ecsl/IR/ECSLDialect.h"
 

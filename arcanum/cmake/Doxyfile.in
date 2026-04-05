@@ -20,9 +20,11 @@ INPUT                  = "@ARCANUM_DOXYGEN_INPUT@/ecsl" \
                          "@ARCANUM_DOXYGEN_INPUT@/verify" \
                          "@ARCANUM_DOXYGEN_INPUT@/tools" \
                          "@ARCANUM_DOXYGEN_INPUT@/docs/DoxygenStyle.md"
-FILE_PATTERNS          = *.h *.hpp *.cpp *.c *.cc *.td *.md
+FILE_PATTERNS          = *.h *.hpp *.td *.md
 RECURSIVE              = YES
-EXCLUDE_PATTERNS       = */build/* */.git/* *.inc
+EXCLUDE_PATTERNS       = */.git/*
+INCLUDE_PATH           = "@PROJECT_BINARY_DIR@" \
+                         "@PROJECT_SOURCE_DIR@"
 EXTRACT_ALL            = NO
 EXTRACT_PRIVATE        = NO
 EXTRACT_STATIC         = YES

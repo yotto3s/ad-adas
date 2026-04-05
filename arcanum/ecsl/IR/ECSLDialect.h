@@ -1,8 +1,5 @@
-//===- ECSLDialect.h - ECSL dialect declaration -----------------*- C++ -*-===//
-//
-// Declares the ECSL MLIR dialect class.
-//
-//===----------------------------------------------------------------------===//
+/// \file
+/// Declares the ECSL MLIR dialect class.
 
 #ifndef ECSL_IR_ECSLDIALECT_H
 #define ECSL_IR_ECSLDIALECT_H
