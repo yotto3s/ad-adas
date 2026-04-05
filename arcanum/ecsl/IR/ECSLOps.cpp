@@ -33,8 +33,8 @@ bool isConstraintOp(const ::mlir::Operation *op) {
 ::mlir::LogicalResult verifyConstraintNaryBody(::mlir::Operation *parent,
                                                ::mlir::Block &block) {
   for (::mlir::Operation &innerOp : block) {
-    for (const ::mlir::Value Result : innerOp.getResults()) {
-      if (Result.getType().isInteger(1) && !isConstraintOp(&innerOp)) {
+    for (const ::mlir::Value result : innerOp.getResults()) {
+      if (result.getType().isInteger(1) && !isConstraintOp(&innerOp)) {
         return parent->emitOpError(
                    "region must only contain ecsl.constraint.* ops as "
                    "i1-producing ops; got ")
@@ -48,16 +48,16 @@ bool isConstraintOp(const ::mlir::Operation *op) {
 } // namespace
 
 ::mlir::LogicalResult FuncOp::verify() {
-  const ::mlir::FunctionType FnType = getFunctionType();
-  const ::mlir::TypeRange ExpectedResults = FnType.getResults();
+  const ::mlir::FunctionType fnType = getFunctionType();
+  const ::mlir::TypeRange expectedResults = fnType.getResults();
   for (::mlir::Block &block : getBody()) {
     auto retOp = ::mlir::dyn_cast<ReturnOp>(block.getTerminator());
     if (!retOp) {
       continue;
     }
-    const ::mlir::TypeRange ActualResults = retOp.getOperands().getTypes();
-    if (ActualResults.size() != ExpectedResults.size() ||
-        !::llvm::equal(ActualResults, ExpectedResults)) {
+    const ::mlir::TypeRange actualResults = retOp.getOperands().getTypes();
+    if (actualResults.size() != expectedResults.size() ||
+        !::llvm::equal(actualResults, expectedResults)) {
       return retOp.emitOpError(
           "operand types do not match ecsl.func result types");
     }
@@ -81,8 +81,8 @@ bool isConstraintOp(const ::mlir::Operation *op) {
     return emitOpError(
         "not allowed in the body region of ecsl.func; use ecsl.return");
   }
-  for (const ::mlir::Value Operand : getClauses()) {
-    if (!isConstraintOp(Operand.getDefiningOp())) {
+  for (const ::mlir::Value operand : getClauses()) {
+    if (!isConstraintOp(operand.getDefiningOp())) {
       return emitOpError(
           "clause operand must be produced by an ecsl.constraint.* op");
     }
