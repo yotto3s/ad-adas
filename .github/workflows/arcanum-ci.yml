@@ -91,6 +91,27 @@ jobs:
         working-directory: arcanum
         run: ./scripts/check-include-guards.sh
 
+  clang-format:
+    name: clang-format
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ghcr.io/${{ github.repository }}/arcanum-ci:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check formatting
+        working-directory: arcanum
+        run: |
+          find . -type f \
+              \( -name '*.h' -o -name '*.hpp' -o -name '*.cpp' \
+                 -o -name '*.c' -o -name '*.cc' \) \
+              -not -path './build/*' -print0 \
+            | xargs -0 --no-run-if-empty clang-format --dry-run --Werror
+
   docs:
     name: Doxygen Docs
     needs: build
