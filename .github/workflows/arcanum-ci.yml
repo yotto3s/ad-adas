@@ -71,7 +71,7 @@ jobs:
       - name: Run clang-tidy
         working-directory: arcanum
         run: |
-          find . -type f -name '*.cpp' -not -path './build/*' -print0 \
+          git ls-files -z '*.cpp' \
             | xargs -0 --no-run-if-empty \
                 clang-tidy -p build/dev --quiet --warnings-as-errors='*'
 

@@ -10,8 +10,7 @@ set -euo pipefail
 
 fail=0
 while IFS= read -r -d '' file; do
-  rel="${file#./}"
-  expected=$(echo "$rel" | tr '[:lower:]/.' '[:upper:]__')
+  expected=$(echo "$file" | tr '[:lower:]/.' '[:upper:]__')
   ifndef=$(grep -m1 '^#ifndef ' "$file" | awk '{print $2}' || true)
   define=$(grep -m1 '^#define ' "$file" | awk '{print $2}' || true)
   if [[ "$ifndef" != "$expected" || "$define" != "$expected" ]]; then
@@ -21,6 +20,6 @@ while IFS= read -r -d '' file; do
     echo "  #define:  ${define:-<missing>}"
     fail=1
   fi
-done < <(find . -name '*.h' -not -path './build/*' -print0)
+done < <(git ls-files -z '*.h')
 
 exit $fail
