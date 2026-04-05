@@ -74,9 +74,19 @@ CheckOptions:
   - key: readability-identifier-naming.PrivateMemberCase
     value: camelBack
 
-  # --- Constants: CamelCase (LLVM standard) ---
+  # --- Constants: camelBack for locals, CamelCase for true constants ---
+  # A plain `const T x` in a function is still a variable, so use
+  # camelBack. Only compile-time / class-scope constants use CamelCase.
   - key: readability-identifier-naming.ConstantCase
-    value: CamelCase
+    value: camelBack
+  - key: readability-identifier-naming.LocalConstantCase
+    value: camelBack
+  - key: readability-identifier-naming.ConstantParameterCase
+    value: camelBack
+  - key: readability-identifier-naming.ConstantPointerParameterCase
+    value: camelBack
+  - key: readability-identifier-naming.LocalConstantPointerCase
+    value: camelBack
   - key: readability-identifier-naming.ConstexprVariableCase
     value: CamelCase
   - key: readability-identifier-naming.StaticConstantCase
