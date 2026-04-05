@@ -1,8 +1,7 @@
-# FindMLIR.cmake - Helper to locate MLIR installation
+# FindMLIR.cmake - Locate MLIR installation
 #
-# LLVM 22 ships proper CMake config files (MLIRConfig.cmake), so this
-# module searches common installation prefixes as a convenience fallback.
-# The user can bypass this by setting MLIR_DIR directly.
+# Searches common LLVM installation prefixes for MLIRConfig.cmake,
+# then delegates to config-mode discovery.
 #
 # Sets:
 #   MLIR_FOUND - TRUE if MLIRConfig.cmake was found

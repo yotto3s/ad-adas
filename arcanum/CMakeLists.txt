@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 project(Arcanum
   VERSION 0.1.0
   LANGUAGES CXX C
@@ -20,13 +20,8 @@ if(CCACHE_PROGRAM)
 endif()
 
 # --- Find MLIR (which transitively finds LLVM) ---
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-
-if(NOT DEFINED MLIR_DIR)
-  set(MLIR_DIR "/usr/lib/llvm-22/lib/cmake/mlir" CACHE PATH "Path to MLIRConfig.cmake")
-endif()
-
-find_package(MLIR REQUIRED CONFIG)
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+find_package(MLIR REQUIRED)
 
 message(STATUS "Using MLIRConfig.cmake in: ${MLIR_DIR}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
@@ -57,8 +52,10 @@ add_definitions(${LLVM_DEFINITIONS_LIST})
 # Resolve to full path for custom commands to work correctly.
 if(NOT IS_ABSOLUTE "${MLIR_TABLEGEN_EXE}")
   find_program(MLIR_TABLEGEN_EXE_FULL "mlir-tblgen"
-    PATHS "${MLIR_INSTALL_PREFIX}/bin"
-    NO_DEFAULT_PATH
+    HINTS
+      "${MLIR_INSTALL_PREFIX}/bin"
+      "${LLVM_TOOLS_BINARY_DIR}"
+      "${LLVM_INSTALL_PREFIX}/bin"
     REQUIRED
   )
   set(MLIR_TABLEGEN_EXE "${MLIR_TABLEGEN_EXE_FULL}")
