@@ -49,7 +49,7 @@ def ECSL_Signedness : I32EnumAttr<"Signedness",
 //===----------------------------------------------------------------------===//
 
 def ECSL_FuncOp : ECSL_Op<"func",
-    [Symbol, IsolatedFromAbove, NoTerminator]> {
+    [Symbol, IsolatedFromAbove]> {
   let summary = "ECSL contract function definition";
   let description = [{
     An `ecsl.func` op defines a function with three regions that carry
@@ -92,6 +92,26 @@ def ECSL_ReturnOp : ECSL_Op<"return",
 
   let arguments = (ins Variadic<AnyType>:$operands);
   let assemblyFormat = "($operands^ `:` type($operands))? attr-dict";
+  let hasVerifier = 1;
+}
+
+//===----------------------------------------------------------------------===//
+// ecsl.clause_yield
+//===----------------------------------------------------------------------===//
+
+def ECSL_ClauseYieldOp : ECSL_Op<"clause_yield",
+    [Terminator, ParentOneOf<["::ecsl::FuncOp"]>]> {
+  let summary =
+    "Terminator yielding clauses from a requires/ensures region";
+  let description = [{
+    Terminates a `requires` or `ensures` region of an `ecsl.func`.
+    Each operand represents one contract clause and must be produced
+    by an `ecsl.constraint.*` op. Operands are implicitly conjoined.
+  }];
+
+  let arguments = (ins Variadic<I1>:$clauses);
+  let assemblyFormat = "($clauses^ `:` type($clauses))? attr-dict";
+  let hasVerifier = 1;
 }
 
 //===----------------------------------------------------------------------===//

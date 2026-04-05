@@ -1,6 +1,7 @@
 // Round-trip test for ecsl contract operations: ecsl.func with
 // requires/ensures/body regions, constraint ops (cmp, not, and, or),
-// and ecsl.return.
+// ecsl.clause_yield as the requires/ensures terminator, and
+// ecsl.return.
 
 module {
   ecsl.func @contract_demo : (i32, i32) -> i32
@@ -16,8 +17,11 @@ module {
       }
       %or_result = ecsl.constraint.or {
       }
+      ecsl.clause_yield %c1, %c2, %not_c1, %and_result, %or_result
+          : i1, i1, i1, i1, i1
     }
     ensures {
+      ecsl.clause_yield
     }
     body {
       %r = arith.constant 42 : i32
