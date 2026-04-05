@@ -68,7 +68,7 @@ jobs:
 
       - name: Build docs
         working-directory: arcanum
-        run: cmake --build build/dev --target docs
+        run: cmake --build --preset dev --target docs
 
       - name: Upload HTML artifact
         uses: actions/upload-artifact@v4
