@@ -106,10 +106,7 @@ jobs:
       - name: Check formatting
         working-directory: arcanum
         run: |
-          find . -type f \
-              \( -name '*.h' -o -name '*.hpp' -o -name '*.cpp' \
-                 -o -name '*.c' -o -name '*.cc' \) \
-              -not -path './build/*' -print0 \
+          git ls-files -z '*.h' '*.hpp' '*.cpp' '*.c' '*.cc' \
             | xargs -0 --no-run-if-empty clang-format --dry-run --Werror
 
   docs:
