@@ -1,0 +1,48 @@
+# Doxyfile.in - Arcanum Doxygen configuration template.
+# Processed by CMake via configure_file(); @VAR@ placeholders are
+# expanded at configure time.
+
+PROJECT_NAME           = "@PROJECT_NAME@"
+PROJECT_NUMBER         = "@PROJECT_VERSION@"
+PROJECT_BRIEF          = "Formal verification + test generation toolchain"
+OUTPUT_DIRECTORY       = "@ARCANUM_DOXYGEN_OUTPUT_DIR@"
+
+# --- Input ---
+INPUT                  = "@ARCANUM_DOXYGEN_INPUT@/ecsl" \
+                         "@ARCANUM_DOXYGEN_INPUT@/parser" \
+                         "@ARCANUM_DOXYGEN_INPUT@/testgen" \
+                         "@ARCANUM_DOXYGEN_INPUT@/verify" \
+                         "@ARCANUM_DOXYGEN_INPUT@/tools"
+FILE_PATTERNS          = *.h *.hpp *.cpp *.c *.cc *.td *.md
+RECURSIVE              = YES
+EXCLUDE_PATTERNS       = */build/* */.git/* *.inc
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+
+# --- Build settings ---
+QUIET                  = YES
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_IF_DOC_ERROR      = YES
+WARN_AS_ERROR          = NO
+
+# --- Output ---
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+GENERATE_XML           = NO
+HTML_OUTPUT            = html
+
+# --- Source browsing ---
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+STRIP_CODE_COMMENTS    = YES
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+
+# --- Diagrams (disabled by default; enable if graphviz is desired) ---
+HAVE_DOT               = NO
+
+# --- C++/MLIR specifics ---
+JAVADOC_AUTOBRIEF      = YES
+BUILTIN_STL_SUPPORT    = YES
