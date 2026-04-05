@@ -119,4 +119,25 @@ bool isConstraintOp(const ::mlir::Operation *op) {
   return verifyConstraintNaryBody(*this, getBody().front());
 }
 
+::mlir::LogicalResult VarOp::verify() {
+  if (getVar().getType().getElementType() != getInit().getType()) {
+    return emitOpError("!ecsl.var element type must match init operand type");
+  }
+  return ::mlir::success();
+}
+
+::mlir::LogicalResult AssignOp::verify() {
+  if (getVar().getType().getElementType() != getValue().getType()) {
+    return emitOpError("!ecsl.var element type must match assigned value type");
+  }
+  return ::mlir::success();
+}
+
+::mlir::LogicalResult LoadOp::verify() {
+  if (getVar().getType().getElementType() != getValue().getType()) {
+    return emitOpError("!ecsl.var element type must match load result type");
+  }
+  return ::mlir::success();
+}
+
 } // namespace ecsl

@@ -10,6 +10,7 @@
 #define ECSL_IR_ECSL_OPS_TD
 
 include "ecsl/IR/ECSLDialect.td"
+include "mlir/IR/AttrTypeBase.td"
 include "mlir/IR/BuiltinAttributes.td"
 include "mlir/IR/BuiltinTypes.td"
 include "mlir/IR/EnumAttr.td"
@@ -19,6 +20,26 @@ include "mlir/Interfaces/SideEffectInterfaces.td"
 
 class ECSL_Op<string mnemonic, list<Trait> traits = []>
     : Op<ECSL_Dialect, mnemonic, traits>;
+
+class ECSL_Type<string name, string typeMnemonic>
+    : TypeDef<ECSL_Dialect, name> {
+  let mnemonic = typeMnemonic;
+}
+
+//===----------------------------------------------------------------------===//
+// Types
+//===----------------------------------------------------------------------===//
+
+def ECSL_VarType : ECSL_Type<"Var", "var"> {
+  let summary = "Handle to a mutable ECSL variable";
+  let description = [{
+    `!ecsl.var<T>` is a handle to a mutable storage cell holding a
+    value of type `T`. Produced by `ecsl.var`, mutated by
+    `ecsl.assign`, read by `ecsl.load`.
+  }];
+  let parameters = (ins "::mlir::Type":$elementType);
+  let assemblyFormat = "`<` $elementType `>`";
+}
 
 //===----------------------------------------------------------------------===//
 // Enums
@@ -174,6 +195,61 @@ def ECSL_ConstraintAndOp : ECSL_ConstraintNaryOp<"constraint.and"> {
 
 def ECSL_ConstraintOrOp : ECSL_ConstraintNaryOp<"constraint.or"> {
   let summary = "Logical disjunction of the constraints in its region";
+}
+
+//===----------------------------------------------------------------------===//
+// ecsl.var / ecsl.assign / ecsl.load
+//===----------------------------------------------------------------------===//
+
+def ECSL_VarOp : ECSL_Op<"var"> {
+  let summary = "Declare and initialize a mutable variable";
+  let description = [{
+    Allocates a new mutable storage cell initialized to `$init` and
+    returns a handle of type `!ecsl.var<T>` where `T` is the type of
+    `$init`. Subsequent `ecsl.assign` / `ecsl.load` ops read and
+    write the cell through this handle.
+  }];
+  let arguments = (ins AnyType:$init);
+  let results = (outs ECSL_VarType:$var);
+  let assemblyFormat =
+    "$init `:` type($init) `->` type($var) attr-dict";
+  let hasVerifier = 1;
+}
+
+def ECSL_AssignOp : ECSL_Op<"assign"> {
+  let summary = "Assign a value to an ECSL variable";
+  let arguments = (ins ECSL_VarType:$var, AnyType:$value);
+  let assemblyFormat =
+    "$var `,` $value `:` type($var) `,` type($value) attr-dict";
+  let hasVerifier = 1;
+}
+
+def ECSL_LoadOp : ECSL_Op<"load"> {
+  let summary = "Read the current value of an ECSL variable";
+  let arguments = (ins ECSL_VarType:$var);
+  let results = (outs AnyType:$value);
+  let assemblyFormat =
+    "$var `:` type($var) `->` type($value) attr-dict";
+  let hasVerifier = 1;
+}
+
+//===----------------------------------------------------------------------===//
+// ecsl.call
+//===----------------------------------------------------------------------===//
+
+def ECSL_CallOp : ECSL_Op<"call"> {
+  let summary = "Call an ecsl.func";
+  let description = [{
+    Calls the `ecsl.func` named by `$callee`. Operand and result
+    types must match the callee's `function_type` (enforced at
+    symbol-resolution time in a later pass).
+  }];
+  let arguments = (ins FlatSymbolRefAttr:$callee,
+                       Variadic<AnyType>:$operands);
+  let results = (outs Variadic<AnyType>:$results);
+  let assemblyFormat =
+    "$callee `(` $operands `)` attr-dict "
+    "`:` functional-type($operands, $results)";
 }
 
 #endif // ECSL_IR_ECSL_OPS_TD

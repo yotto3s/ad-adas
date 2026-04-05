@@ -7,6 +7,8 @@ mlir_tablegen(ECSLOps.h.inc -gen-op-decls)
 mlir_tablegen(ECSLOps.cpp.inc -gen-op-defs)
 mlir_tablegen(ECSLEnums.h.inc -gen-enum-decls)
 mlir_tablegen(ECSLEnums.cpp.inc -gen-enum-defs)
+mlir_tablegen(ECSLTypes.h.inc -gen-typedef-decls -typedefs-dialect=ecsl)
+mlir_tablegen(ECSLTypes.cpp.inc -gen-typedef-defs -typedefs-dialect=ecsl)
 add_public_tablegen_target(ECSLOpsIncGen)
 
 add_mlir_dialect_library(MLIRECSL
