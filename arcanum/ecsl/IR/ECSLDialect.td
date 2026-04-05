@@ -15,7 +15,7 @@ def ECSL_Dialect : Dialect {
   let summary = "ECSL dialect for Arcanum";
   let description = [{
     The ECSL dialect carries contract annotations (requires, ensures)
-    for functions translated from ECSL-annotated C sources.
+    for functions translated from ECSL-annotated C/C++ sources.
   }];
   let cppNamespace = "::ecsl";
 }
