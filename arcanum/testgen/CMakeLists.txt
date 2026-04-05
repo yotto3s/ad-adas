@@ -1,6 +1,8 @@
 # testgen/ - Test Generation Dialect and Passes
 #
-# Components:
+# Subdirectories:
 #   IR/       - TestGen dialect definition (.td + C++)
-#   Passes/   - BoundaryValuePass
-#   CodeGen/  - Google Test code generator
+#   Passes/   - BoundaryValuePass (future)
+#   CodeGen/  - Google Test code generator (future)
+
+add_subdirectory(IR)
