@@ -52,24 +52,14 @@ Use backslash (`\brief`, `\param`, `\returns`, `\p`, `\file`, `\code`,
 
 ### File header
 
-Every `.h` and `.cpp` file begins with the LLVM-style banner followed
-by a `\file` doc block:
+Every `.h` and `.cpp` file begins with a `\file` doc block:
 
 ```cpp
-//===- ECSLDialect.h - ECSL dialect declaration -----------------*- C++ -*-===//
-//
-// Part of the Arcanum project.
-//
-//===----------------------------------------------------------------------===//
-///
 /// \file
 /// Declares the ECSL MLIR dialect class.
-///
-//===----------------------------------------------------------------------===//
 ```
 
-The `\file` block is what Doxygen picks up; the surrounding `//===`
-banner is the LLVM convention for source navigation.
+The first sentence becomes the file's brief. Keep it to one line.
 
 ### Brief and detailed description
 
