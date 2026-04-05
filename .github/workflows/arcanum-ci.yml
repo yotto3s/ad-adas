@@ -140,12 +140,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Doxygen and Graphviz
-        run: |
-          apt-get update
-          apt-get install -y --no-install-recommends doxygen graphviz
-          rm -rf /var/lib/apt/lists/*
-
       - name: Configure
         working-directory: arcanum
         run: cmake --preset dev
