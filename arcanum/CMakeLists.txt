@@ -71,6 +71,9 @@ if(NOT TARGET mlir-generic-headers)
   add_custom_target(mlir-generic-headers)
 endif()
 
+# --- Testing ---
+enable_testing()
+
 # --- Documentation (optional) ---
 include(cmake/Doxygen.cmake)
 
