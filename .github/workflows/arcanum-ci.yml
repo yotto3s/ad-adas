@@ -109,6 +109,28 @@ jobs:
           git ls-files -z '*.h' '*.hpp' '*.cpp' '*.c' '*.cc' \
             | xargs -0 --no-run-if-empty clang-format --dry-run --Werror
 
+  codespell:
+    name: codespell
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ghcr.io/${{ github.repository }}/arcanum-ci:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install codespell
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends codespell
+          rm -rf /var/lib/apt/lists/*
+
+      - name: Run codespell
+        working-directory: arcanum
+        run: codespell --check-filenames -q 3 --skip='./build/*,./.git/*' .
+
   docs:
     name: Doxygen Docs
     needs: build
