@@ -51,4 +51,4 @@ REFERENCES_RELATION    = YES
 
 # --- Diagrams (requires graphviz; CMake sets HAVE_DOT) ---
 HAVE_DOT               = @ARCANUM_DOXYGEN_HAVE_DOT@
-DOT_PATH               = @ARCANUM_DOXYGEN_DOT_PATH@
+DOT_PATH               = "@ARCANUM_DOXYGEN_DOT_PATH@"
