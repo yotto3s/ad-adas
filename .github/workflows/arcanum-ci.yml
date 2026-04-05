@@ -26,7 +26,7 @@ jobs:
         uses: hendrikmuhs/ccache-action@v1
         with:
           key: arcanum-${{ github.job }}
-          max-size: 500M
+          max-size: 2G
 
       - name: Configure (dev preset)
         working-directory: arcanum
