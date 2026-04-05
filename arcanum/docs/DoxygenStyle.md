@@ -127,7 +127,6 @@ Implementation-detail comments in .cpp files use plain `//` (not
 - **Namespaces:** Arcanum uses flat per-dialect C++ namespaces (for
   example `ecsl` and `testgen`, each at the top level) rather than an
   umbrella project namespace such as `arcanum::ecsl`.
-- **Column limit:** 80 columns (LLVM is also 80).
 - **EXTRACT_ALL:** We use `NO` (LLVM uses `YES`) because our tree is
   greenfield and we can afford strict undocumented-symbol enforcement
   from day one.
