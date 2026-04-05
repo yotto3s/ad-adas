@@ -71,6 +71,9 @@ if(NOT TARGET mlir-generic-headers)
   add_custom_target(mlir-generic-headers)
 endif()
 
+# --- Testing ---
+include(CTest)
+
 # --- Documentation (optional) ---
 include(cmake/Doxygen.cmake)
 
@@ -80,4 +83,6 @@ add_subdirectory(parser)
 add_subdirectory(testgen)
 add_subdirectory(verify)
 add_subdirectory(tools)
-add_subdirectory(test)
+if(BUILD_TESTING)
+  add_subdirectory(test)
+endif()

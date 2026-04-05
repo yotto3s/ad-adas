@@ -1,5 +1,7 @@
 # ecsl/ - ECSL MLIR Dialect
 #
-# This directory will contain the ECSL dialect definition:
+# Subdirectories:
 #   IR/       - TableGen definitions (.td) and C++ dialect/ops implementation
-#   Passes/   - Dialect-specific transformation passes
+#   Passes/   - Dialect-specific transformation passes (future)
+
+add_subdirectory(IR)
