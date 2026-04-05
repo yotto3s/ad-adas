@@ -71,6 +71,9 @@ if(NOT TARGET mlir-generic-headers)
   add_custom_target(mlir-generic-headers)
 endif()
 
+# --- Documentation (optional) ---
+include(cmake/Doxygen.cmake)
+
 # --- Subdirectories ---
 add_subdirectory(ecsl)
 add_subdirectory(parser)
