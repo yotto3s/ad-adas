@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    name: CMake Build
+    name: CMake Build (${{ matrix.preset }})
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -22,27 +22,24 @@ jobs:
     container:
       image: ghcr.io/${{ github.repository }}/arcanum-ci:latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [dev, release]
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          key: arcanum-${{ github.job }}
+          key: arcanum-${{ matrix.preset }}
           max-size: 2G
 
-      - name: Configure (dev preset)
+      - name: Configure
         working-directory: arcanum
-        run: cmake --preset dev
+        run: cmake --preset ${{ matrix.preset }}
 
-      - name: Build (dev preset)
+      - name: Build
         working-directory: arcanum
-        run: cmake --build --preset dev
-
-      - name: Configure (release preset)
-        working-directory: arcanum
-        run: cmake --preset release
-
-      - name: Build (release preset)
-        working-directory: arcanum
-        run: cmake --build --preset release
+        run: cmake --build --preset ${{ matrix.preset }}
