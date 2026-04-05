@@ -1,0 +1,21 @@
+BasedOnStyle: LLVM
+ColumnLimit: 80
+SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+IncludeCategories:
+  # Project headers
+  - Regex: '^"(ecsl|parser|testgen|verify|tools)/'
+    Priority: 1
+  # MLIR headers
+  - Regex: '^"mlir/'
+    Priority: 2
+  - Regex: '^<mlir/'
+    Priority: 2
+  # LLVM headers
+  - Regex: '^"llvm/'
+    Priority: 3
+  - Regex: '^<llvm/'
+    Priority: 3
+  # System headers
+  - Regex: '^<'
+    Priority: 4

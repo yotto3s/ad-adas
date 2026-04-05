@@ -1,0 +1,45 @@
+name: Arcanum CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'arcanum/**'
+      - '.github/workflows/arcanum-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'arcanum/**'
+      - '.github/workflows/arcanum-ci.yml'
+
+jobs:
+  build:
+    name: CMake Build (${{ matrix.preset }})
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ghcr.io/${{ github.repository }}/arcanum-ci:latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [dev, release]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: arcanum-${{ matrix.preset }}
+          max-size: 2G
+
+      - name: Configure
+        working-directory: arcanum
+        run: cmake --preset ${{ matrix.preset }}
+
+      - name: Build
+        working-directory: arcanum
+        run: cmake --build --preset ${{ matrix.preset }}
