@@ -125,7 +125,8 @@ def ECSL_ConstraintCmpOp : ECSL_Op<"constraint.cmp",
   let description = [{
     Compares two integer operands of the same type using
     `$predicate`, interpreting them according to `$signedness`.
-    Produces an `i1` truth value.
+    Produces an `i1` truth value. Operand width must be one of
+    {1, 8, 16, 32, 64}.
   }];
 
   let arguments = (ins
@@ -139,6 +140,7 @@ def ECSL_ConstraintCmpOp : ECSL_Op<"constraint.cmp",
     $predicate `,` $signedness `,` $lhs `,` $rhs
       `:` type($lhs) attr-dict
   }];
+  let hasVerifier = 1;
 }
 
 //===----------------------------------------------------------------------===//

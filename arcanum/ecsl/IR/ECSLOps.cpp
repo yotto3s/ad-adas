@@ -11,6 +11,8 @@
 
 #include "llvm/ADT/STLExtras.h"
 
+#include <array>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Weverything"
 
@@ -86,6 +88,18 @@ bool isConstraintOp(const ::mlir::Operation *op) {
       return emitOpError(
           "clause operand must be produced by an ecsl.constraint.* op");
     }
+  }
+  return ::mlir::success();
+}
+
+::mlir::LogicalResult ConstraintCmpOp::verify() {
+  static constexpr std::array<unsigned, 5> AllowedWidths{1, 8, 16, 32, 64};
+  const auto intType = ::mlir::cast<::mlir::IntegerType>(getLhs().getType());
+  const unsigned width = intType.getWidth();
+  if (::llvm::find(AllowedWidths, width) == AllowedWidths.end()) {
+    return emitOpError("operand width must be one of {1, 8, 16, 32, 64}, "
+                       "got i")
+           << width;
   }
   return ::mlir::success();
 }
