@@ -44,6 +44,10 @@ jobs:
         working-directory: arcanum
         run: cmake --build --preset ${{ matrix.preset }}
 
+      - name: Test
+        working-directory: arcanum
+        run: ctest --test-dir build/${{ matrix.preset }} --output-on-failure
+
   clang-tidy:
     name: clang-tidy
     runs-on: ubuntu-24.04
