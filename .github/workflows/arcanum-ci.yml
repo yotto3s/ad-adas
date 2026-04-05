@@ -129,7 +129,9 @@ jobs:
 
       - name: Run codespell
         working-directory: arcanum
-        run: codespell --check-filenames -q 3 --skip='./build/*,./.git/*' .
+        run: |
+          git ls-files -z \
+            | xargs -0 --no-run-if-empty codespell --check-filenames -q 3
 
   docs:
     name: Doxygen Docs
