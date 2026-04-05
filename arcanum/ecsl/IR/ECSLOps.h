@@ -13,11 +13,18 @@
 #include "mlir/IR/SymbolTable.h"
 #include "mlir/Interfaces/SideEffectInterfaces.h"
 
+// TableGen-generated code uses patterns that don't align with our
+// strict warning policy; silence warnings for the .inc scope only.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Weverything"
+
 // clang-format off
 #include "ecsl/IR/ECSLEnums.h.inc"
 // clang-format on
 
 #define GET_OP_CLASSES
 #include "ecsl/IR/ECSLOps.h.inc"
+
+#pragma clang diagnostic pop
 
 #endif // ECSL_IR_ECSLOPS_H
