@@ -121,12 +121,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install codespell
-        run: |
-          apt-get update
-          apt-get install -y --no-install-recommends codespell
-          rm -rf /var/lib/apt/lists/*
-
       - name: Run codespell
         working-directory: arcanum
         run: |
