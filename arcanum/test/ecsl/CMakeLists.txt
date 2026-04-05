@@ -7,8 +7,6 @@ add_executable(arcanum-test-ecsl-register
 target_link_libraries(arcanum-test-ecsl-register
   PRIVATE
   MLIRECSL
-  MLIRIR
-  MLIRSupport
 )
 
 add_test(NAME ecsl-register
