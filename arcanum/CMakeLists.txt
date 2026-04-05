@@ -38,10 +38,15 @@ include(AddMLIR)
 include(HandleLLVMOptions)
 
 # --- Include paths ---
-include_directories(${LLVM_INCLUDE_DIRS})
-include_directories(${MLIR_INCLUDE_DIRS})
+# LLVM/MLIR treated as SYSTEM includes so their headers don't fire
+# Arcanum's stricter warnings (see cmake/Warnings.cmake).
+include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
+include_directories(SYSTEM ${MLIR_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+# --- Compiler warnings ---
+include(cmake/Warnings.cmake)
 
 # --- LLVM definitions ---
 separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
