@@ -1,5 +1,6 @@
 /// \file
-/// Declares the ECSL dialect operation classes, enums, and attributes.
+/// Declares the ECSL dialect operation classes, enums, types, and
+/// attributes.
 
 #ifndef ECSL_IR_ECSLOPS_H
 #define ECSL_IR_ECSLOPS_H
@@ -7,6 +8,7 @@
 #include "mlir/Bytecode/BytecodeOpInterface.h"
 #include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/Dialect.h"
+#include "mlir/IR/DialectImplementation.h"
 #include "mlir/IR/ImplicitLocOpBuilder.h"
 #include "mlir/IR/OpDefinition.h"
 #include "mlir/IR/OpImplementation.h"
@@ -21,6 +23,9 @@
 // clang-format off
 #include "ecsl/IR/ECSLEnums.h.inc"
 // clang-format on
+
+#define GET_TYPEDEF_CLASSES
+#include "ecsl/IR/ECSLTypes.h.inc"
 
 #define GET_OP_CLASSES
 #include "ecsl/IR/ECSLOps.h.inc"

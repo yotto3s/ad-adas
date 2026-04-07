@@ -18,6 +18,7 @@ def ECSL_Dialect : Dialect {
     for functions translated from ECSL-annotated C/C++ sources.
   }];
   let cppNamespace = "::ecsl";
+  let useDefaultTypePrinterParser = 1;
 }
 
 #endif // ECSL_IR_ECSL_DIALECT_TD

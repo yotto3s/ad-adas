@@ -46,17 +46,17 @@ break → 再帰を呼ばずに値を返す。continue → 次の再帰呼び出
 - **ネストされたループ**: 二重ループは2段の再帰関数に変換するか、内側ループを独立関数に抽出するか
 - **SMTソルバの性能評価**: 再帰関数の検証がループ不変条件ベースの検証と比較してソルバ負荷がどの程度異なるか、実際のベンチマークで評価する
 
-## F2: ecsl.var/assign/loadのSSA整合性
+## F2: ecsl.var/store/loadのSSA整合性
 
 ### 背景
 
-MLIRはSSA（静的単一代入）形式が基本だが、Cのミュータブル変数は同一変数への再代入が発生する。ecslの`ecsl.var`/`ecsl.assign`/`ecsl.load`でこれを表現する必要がある。
+MLIRはSSA（静的単一代入）形式が基本だが、Cのミュータブル変数は同一変数への再代入が発生する。ecslの`ecsl.var`/`ecsl.store`/`ecsl.load`でこれを表現する必要がある。
 
 ### 選択肢
 
 **(A) SSA値として扱う**: 再代入のたびに新しいSSA値を生成し、後続の参照を更新する。ミュータブル変数を使わないCコード（関数型スタイル）には自然だが、一般的なCコードでは複雑になる。
 
-**(B) 参照セマンティクス**: `ecsl.var`がメモリスロットを確保し、`ecsl.assign`/`ecsl.load`でread/writeする。memrefに似ているが独自型。WhyMLの`let ref`と直接対応する利点がある。
+**(B) 参照セマンティクス**: `ecsl.var`がメモリスロットを確保し、`ecsl.store`/`ecsl.load`でread/writeする。memrefに似ているが独自型。WhyMLの`let ref`と直接対応する利点がある。
 
 **(C) scf.if内のblock argumentで伝搬**: scf.ifがyieldする値としてミュータブル変数の「最新値」を渡す。SSA的にクリーンだが、変数が増えるとyieldの引数が煩雑になる。
 

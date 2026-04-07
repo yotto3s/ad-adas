@@ -1,6 +1,4 @@
-# test/tools/ - CLI tool smoke tests
-
-add_test(NAME arcanum-opt-roundtrip
-  COMMAND arcanum-opt
-    "${CMAKE_CURRENT_SOURCE_DIR}/arith-scf-roundtrip.mlir"
-)
+# test/tools/ - CLI tool unit tests
+#
+# Smoke tests for arcanum-opt have moved to lit (.mlir files with
+# RUN lines). This directory is reserved for future C++ tool tests.

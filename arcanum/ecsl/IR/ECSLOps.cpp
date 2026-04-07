@@ -6,6 +6,7 @@
 #include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/Operation.h"
 #include "mlir/IR/Region.h"
+#include "mlir/IR/SymbolTable.h"
 #include "mlir/IR/Value.h"
 #include "mlir/Support/LLVM.h"
 
@@ -117,6 +118,45 @@ bool isConstraintOp(const ::mlir::Operation *op) {
 
 ::mlir::LogicalResult ConstraintOrOp::verify() {
   return verifyConstraintNaryBody(*this, getBody().front());
+}
+
+::mlir::LogicalResult VarOp::verify() {
+  if (getVar().getType().getElementType() != getInit().getType()) {
+    return emitOpError("!ecsl.var element type must match init operand type");
+  }
+  return ::mlir::success();
+}
+
+::mlir::LogicalResult StoreOp::verify() {
+  if (getVar().getType().getElementType() != getValue().getType()) {
+    return emitOpError("!ecsl.var element type must match stored value type");
+  }
+  return ::mlir::success();
+}
+
+::mlir::LogicalResult LoadOp::verify() {
+  if (getVar().getType().getElementType() != getValue().getType()) {
+    return emitOpError("!ecsl.var element type must match load result type");
+  }
+  return ::mlir::success();
+}
+
+::mlir::LogicalResult
+CallOp::verifySymbolUses(::mlir::SymbolTableCollection &symbolTable) {
+  auto callee =
+      symbolTable.lookupNearestSymbolFrom<FuncOp>(*this, getCalleeAttr());
+  if (!callee) {
+    return emitOpError("'")
+           << getCallee() << "' does not reference a valid ecsl.func";
+  }
+  const ::mlir::FunctionType calleeType = callee.getFunctionType();
+  if (!::llvm::equal(calleeType.getInputs(), getOperands().getTypes())) {
+    return emitOpError("operand types do not match callee input types");
+  }
+  if (!::llvm::equal(calleeType.getResults(), getResults().getTypes())) {
+    return emitOpError("result types do not match callee result types");
+  }
+  return ::mlir::success();
 }
 
 } // namespace ecsl
