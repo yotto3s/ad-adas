@@ -1,3 +1,5 @@
+// RUN: %arcanum-opt --verify-diagnostics --split-input-file %s
+
 // Negative tests for ecsl body operations: verify that type
 // mismatches and invalid symbol references are rejected.
 
