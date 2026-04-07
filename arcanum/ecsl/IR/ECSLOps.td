@@ -237,12 +237,12 @@ def ECSL_LoadOp : ECSL_Op<"load"> {
 // ecsl.call
 //===----------------------------------------------------------------------===//
 
-def ECSL_CallOp : ECSL_Op<"call"> {
+def ECSL_CallOp : ECSL_Op<"call",
+    [DeclareOpInterfaceMethods<SymbolUserOpInterface>]> {
   let summary = "Call an ecsl.func";
   let description = [{
     Calls the `ecsl.func` named by `$callee`. Operand and result
-    types must match the callee's `function_type` (enforced at
-    symbol-resolution time in a later pass).
+    types must match the callee's `function_type`.
   }];
   let arguments = (ins FlatSymbolRefAttr:$callee,
                        Variadic<AnyType>:$operands);

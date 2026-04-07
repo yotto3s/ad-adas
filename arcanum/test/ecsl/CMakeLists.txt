@@ -22,3 +22,8 @@ add_test(NAME ecsl-body-ops-roundtrip
   COMMAND arcanum-opt
     "${CMAKE_CURRENT_SOURCE_DIR}/ecsl-body-ops.mlir"
 )
+
+add_test(NAME ecsl-body-ops-invalid
+  COMMAND arcanum-opt --verify-diagnostics --split-input-file
+    "${CMAKE_CURRENT_SOURCE_DIR}/ecsl-body-ops-invalid.mlir"
+)
