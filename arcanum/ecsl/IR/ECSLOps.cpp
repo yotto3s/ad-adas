@@ -127,9 +127,9 @@ bool isConstraintOp(const ::mlir::Operation *op) {
   return ::mlir::success();
 }
 
-::mlir::LogicalResult AssignOp::verify() {
+::mlir::LogicalResult StoreOp::verify() {
   if (getVar().getType().getElementType() != getValue().getType()) {
-    return emitOpError("!ecsl.var element type must match assigned value type");
+    return emitOpError("!ecsl.var element type must match stored value type");
   }
   return ::mlir::success();
 }

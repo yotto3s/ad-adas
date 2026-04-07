@@ -35,7 +35,7 @@ def ECSL_VarType : ECSL_Type<"Var", "var"> {
   let description = [{
     `!ecsl.var<T>` is a handle to a mutable storage cell holding a
     value of type `T`. Produced by `ecsl.var`, mutated by
-    `ecsl.assign`, read by `ecsl.load`.
+    `ecsl.store`, read by `ecsl.load`.
   }];
   let parameters = (ins "::mlir::Type":$elementType);
   let assemblyFormat = "`<` $elementType `>`";
@@ -198,7 +198,7 @@ def ECSL_ConstraintOrOp : ECSL_ConstraintNaryOp<"constraint.or"> {
 }
 
 //===----------------------------------------------------------------------===//
-// ecsl.var / ecsl.assign / ecsl.load
+// ecsl.var / ecsl.store / ecsl.load
 //===----------------------------------------------------------------------===//
 
 def ECSL_VarOp : ECSL_Op<"var"> {
@@ -206,7 +206,7 @@ def ECSL_VarOp : ECSL_Op<"var"> {
   let description = [{
     Allocates a new mutable storage cell initialized to `$init` and
     returns a handle of type `!ecsl.var<T>` where `T` is the type of
-    `$init`. Subsequent `ecsl.assign` / `ecsl.load` ops read and
+    `$init`. Subsequent `ecsl.store` / `ecsl.load` ops read and
     write the cell through this handle.
   }];
   let arguments = (ins AnyType:$init);
@@ -216,8 +216,8 @@ def ECSL_VarOp : ECSL_Op<"var"> {
   let hasVerifier = 1;
 }
 
-def ECSL_AssignOp : ECSL_Op<"assign"> {
-  let summary = "Assign a value to an ECSL variable";
+def ECSL_StoreOp : ECSL_Op<"store"> {
+  let summary = "Store a value into an ECSL variable";
   let arguments = (ins ECSL_VarType:$var, AnyType:$value);
   let assemblyFormat =
     "$var `,` $value `:` type($var) `,` type($value) attr-dict";

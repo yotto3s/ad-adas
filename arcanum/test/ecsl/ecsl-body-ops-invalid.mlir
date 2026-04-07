@@ -18,17 +18,17 @@ module {
 
 // -----
 
-// Verify ecsl.assign rejects element-type mismatch.
+// Verify ecsl.store rejects element-type mismatch.
 module {
-  ecsl.func @assign_mismatch : () -> ()
+  ecsl.func @store_mismatch : () -> ()
     requires { ecsl.clause_yield }
     ensures { ecsl.clause_yield }
     body {
       %init = arith.constant 10 : i32
       %v = ecsl.var %init : i32 -> !ecsl.var<i32>
       %bad = arith.constant 1 : i64
-      // expected-error @+1 {{!ecsl.var element type must match assigned value type}}
-      ecsl.assign %v, %bad : !ecsl.var<i32>, i64
+      // expected-error @+1 {{!ecsl.var element type must match stored value type}}
+      ecsl.store %v, %bad : !ecsl.var<i32>, i64
       ecsl.return
     }
 }

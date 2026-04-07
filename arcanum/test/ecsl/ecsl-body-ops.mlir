@@ -1,4 +1,4 @@
-// Round-trip test for ecsl body operations: ecsl.var, ecsl.assign,
+// Round-trip test for ecsl body operations: ecsl.var, ecsl.store,
 // ecsl.load, and ecsl.call.
 
 module {
@@ -19,7 +19,7 @@ module {
       %cur = ecsl.load %v : !ecsl.var<i32> -> i32
       %two = arith.constant 2 : i32
       %next = arith.addi %cur, %two : i32
-      ecsl.assign %v, %next : !ecsl.var<i32>, i32
+      ecsl.store %v, %next : !ecsl.var<i32>, i32
       %arg = arith.constant 1 : i32
       %called = ecsl.call @callee(%arg) : (i32) -> i32
       %final = ecsl.load %v : !ecsl.var<i32> -> i32
