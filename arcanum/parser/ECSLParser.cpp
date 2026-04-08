@@ -1,13 +1,15 @@
 /// \file
 /// ECSL contract comment parser implementation.
-/// This file contains the lexer; the recursive-descent parser and
-/// pretty-printer are added in subsequent commits.
+/// This file contains the lexer and recursive-descent parser; the
+/// pretty-printer is added in a subsequent commit.
 
 #include "parser/ECSLParser.h"
 
 #include <cctype>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -260,6 +262,257 @@ private:
   SourceLoc loc;
 };
 
+//===----------------------------------------------------------------------===//
+// Parser
+//===----------------------------------------------------------------------===//
+
+class Parser {
+public:
+  Parser(std::vector<Token> toks, std::vector<ParseError>& errs)
+      : tokens(std::move(toks)), errors(errs) {}
+
+  std::vector<Clause> parseClauses() {
+    std::vector<Clause> clauses;
+    unsigned index = 0;
+    while (current().kind != TokKind::Eof) {
+      if (auto clause = parseClause(index)) {
+        clauses.push_back(std::move(*clause));
+        ++index;
+      } else {
+        syncToNextClause();
+      }
+    }
+    return clauses;
+  }
+
+private:
+  std::optional<Clause> parseClause(unsigned index) {
+    const Token startTok = current();
+    Clause clause;
+    clause.loc = startTok.loc;
+    clause.index = index;
+
+    if (startTok.kind == TokKind::KwRequires) {
+      clause.kind = ClauseKind::Requires;
+      advance();
+      clause.predicate = parsePredicate();
+    } else if (startTok.kind == TokKind::KwEnsures) {
+      clause.kind = ClauseKind::Ensures;
+      advance();
+      clause.predicate = parsePredicate();
+    } else if (startTok.kind == TokKind::KwAssigns) {
+      clause.kind = ClauseKind::AssignsNothing;
+      advance();
+      if (!expect(TokKind::KwNothing, "expected '\\nothing' after 'assigns'")) {
+        return std::nullopt;
+      }
+    } else {
+      reportAt("expected 'requires', 'ensures', or 'assigns'", startTok.loc);
+      return std::nullopt;
+    }
+
+    if (!expect(TokKind::Semi, "expected ';' at end of clause")) {
+      return std::nullopt;
+    }
+    return clause;
+  }
+
+  // predicate := logical_or
+  ExprPtr parsePredicate() { return parseLogicalOr(); }
+
+  ExprPtr parseLogicalOr() {
+    ExprPtr lhs = parseLogicalAnd();
+    while (current().kind == TokKind::PipePipe) {
+      const SourceLoc loc = current().loc;
+      advance();
+      ExprPtr rhs = parseLogicalAnd();
+      lhs =
+          makeBinary(BinaryOp::LogicalOr, std::move(lhs), std::move(rhs), loc);
+    }
+    return lhs;
+  }
+
+  ExprPtr parseLogicalAnd() {
+    ExprPtr lhs = parseEquality();
+    while (current().kind == TokKind::AmpAmp) {
+      const SourceLoc loc = current().loc;
+      advance();
+      ExprPtr rhs = parseEquality();
+      lhs =
+          makeBinary(BinaryOp::LogicalAnd, std::move(lhs), std::move(rhs), loc);
+    }
+    return lhs;
+  }
+
+  ExprPtr parseEquality() {
+    ExprPtr lhs = parseRelational();
+    while (current().kind == TokKind::EqEq ||
+           current().kind == TokKind::BangEq) {
+      const BinaryOp op =
+          current().kind == TokKind::EqEq ? BinaryOp::Eq : BinaryOp::Ne;
+      const SourceLoc loc = current().loc;
+      advance();
+      ExprPtr rhs = parseRelational();
+      lhs = makeBinary(op, std::move(lhs), std::move(rhs), loc);
+    }
+    return lhs;
+  }
+
+  ExprPtr parseRelational() {
+    ExprPtr lhs = parseAdditive();
+    while (true) {
+      const TokKind k = current().kind;
+      BinaryOp op = BinaryOp::Eq;
+      if (k == TokKind::Lt) {
+        op = BinaryOp::Lt;
+      } else if (k == TokKind::Le) {
+        op = BinaryOp::Le;
+      } else if (k == TokKind::Gt) {
+        op = BinaryOp::Gt;
+      } else if (k == TokKind::Ge) {
+        op = BinaryOp::Ge;
+      } else {
+        return lhs;
+      }
+      const SourceLoc loc = current().loc;
+      advance();
+      ExprPtr rhs = parseAdditive();
+      lhs = makeBinary(op, std::move(lhs), std::move(rhs), loc);
+    }
+  }
+
+  ExprPtr parseAdditive() {
+    ExprPtr lhs = parseMultiplicative();
+    while (current().kind == TokKind::Plus ||
+           current().kind == TokKind::Minus) {
+      const BinaryOp op =
+          current().kind == TokKind::Plus ? BinaryOp::Add : BinaryOp::Sub;
+      const SourceLoc loc = current().loc;
+      advance();
+      ExprPtr rhs = parseMultiplicative();
+      lhs = makeBinary(op, std::move(lhs), std::move(rhs), loc);
+    }
+    return lhs;
+  }
+
+  ExprPtr parseMultiplicative() {
+    ExprPtr lhs = parseUnary();
+    while (true) {
+      const TokKind k = current().kind;
+      BinaryOp op = BinaryOp::Mul;
+      if (k == TokKind::Star) {
+        op = BinaryOp::Mul;
+      } else if (k == TokKind::Slash) {
+        op = BinaryOp::Div;
+      } else if (k == TokKind::Percent) {
+        op = BinaryOp::Mod;
+      } else {
+        return lhs;
+      }
+      const SourceLoc loc = current().loc;
+      advance();
+      ExprPtr rhs = parseUnary();
+      lhs = makeBinary(op, std::move(lhs), std::move(rhs), loc);
+    }
+  }
+
+  ExprPtr parseUnary() {
+    if (current().kind == TokKind::Bang) {
+      const SourceLoc loc = current().loc;
+      advance();
+      return makeUnary(UnaryOp::Not, parseUnary(), loc);
+    }
+    if (current().kind == TokKind::Minus) {
+      const SourceLoc loc = current().loc;
+      advance();
+      return makeUnary(UnaryOp::Neg, parseUnary(), loc);
+    }
+    return parsePrimary();
+  }
+
+  ExprPtr parsePrimary() {
+    const Token tok = current();
+    if (tok.kind == TokKind::Ident) {
+      advance();
+      return makeExpr(Identifier{tok.text}, tok.loc);
+    }
+    if (tok.kind == TokKind::IntLit) {
+      advance();
+      return makeExpr(IntLiteral{tok.text}, tok.loc);
+    }
+    if (tok.kind == TokKind::KwResult) {
+      advance();
+      return makeExpr(ResultExpr{}, tok.loc);
+    }
+    if (tok.kind == TokKind::LParen) {
+      advance();
+      ExprPtr inner = parsePredicate();
+      expect(TokKind::RParen, "expected ')' to close expression");
+      return inner;
+    }
+    reportAt("expected expression, got '" + tok.text + "'", tok.loc);
+    advance();
+    return makeExpr(IntLiteral{"0"}, tok.loc); // error recovery
+  }
+
+  bool expect(TokKind kind, const std::string& message) {
+    if (current().kind == kind) {
+      advance();
+      return true;
+    }
+    reportAt(message, current().loc);
+    return false;
+  }
+
+  void syncToNextClause() {
+    while (current().kind != TokKind::Eof) {
+      if (current().kind == TokKind::Semi) {
+        advance();
+        return;
+      }
+      advance();
+    }
+  }
+
+  void reportAt(std::string message, SourceLoc loc) {
+    errors.push_back({std::move(message), loc});
+  }
+
+  [[nodiscard]] const Token& current() const { return tokens[cursor]; }
+
+  void advance() {
+    if (tokens[cursor].kind != TokKind::Eof) {
+      ++cursor;
+    }
+  }
+
+  static ExprPtr makeBinary(BinaryOp op, ExprPtr lhs, ExprPtr rhs,
+                            SourceLoc loc) {
+    auto expr = std::make_unique<Expr>();
+    expr->node = BinaryExpr{op, std::move(lhs), std::move(rhs)};
+    expr->loc = loc;
+    return expr;
+  }
+
+  static ExprPtr makeUnary(UnaryOp op, ExprPtr operand, SourceLoc loc) {
+    auto expr = std::make_unique<Expr>();
+    expr->node = UnaryExpr{op, std::move(operand)};
+    expr->loc = loc;
+    return expr;
+  }
+
+  template <typename T> static ExprPtr makeExpr(T node, SourceLoc loc) {
+    auto expr = std::make_unique<Expr>();
+    expr->node = std::move(node);
+    expr->loc = loc;
+    return expr;
+  }
+
+  std::vector<Token> tokens;
+  std::vector<ParseError>& errors;
+  std::size_t cursor = 0;
+};
+
 } // namespace
 
 //===----------------------------------------------------------------------===//
@@ -269,9 +522,9 @@ private:
 ParseResult parseContract(std::string_view input) {
   ParseResult result;
   Lexer lexer(input);
-  const auto tokens = lexer.tokenize(result.errors);
-  std::ignore = tokens;
-  // TODO: implement parsing here
+  auto tokens = lexer.tokenize(result.errors);
+  Parser parser(std::move(tokens), result.errors);
+  result.clauses = parser.parseClauses();
   return result;
 }
 

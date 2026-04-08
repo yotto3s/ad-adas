@@ -8,8 +8,9 @@ Checks: >
   readability-*,
   -modernize-use-trailing-return-type,
   -readability-identifier-length,
+  -misc-no-recursion
 
-WarningsAsErrors: ''
+WarningsAsErrors: '*'
 
 HeaderFilterRegex: '(ecsl|parser|testgen|verify|tools)/.*\.h$'
 
