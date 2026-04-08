@@ -2,6 +2,7 @@
 
 # --- Unit tests (C++ executables, run via CTest) ---
 add_subdirectory(ecsl)
+add_subdirectory(parser)
 add_subdirectory(testgen)
 add_subdirectory(tools)
 

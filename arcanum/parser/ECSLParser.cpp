@@ -1,7 +1,6 @@
 /// \file
 /// ECSL contract comment parser implementation.
-/// This file contains the lexer and recursive-descent parser; the
-/// pretty-printer is added in a subsequent commit.
+/// Contains the lexer, recursive-descent parser, and pretty-printer.
 
 #include "parser/ECSLParser.h"
 
@@ -10,9 +9,12 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <sstream>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <utility>
+#include <variant>
 #include <vector>
 
 namespace arcanum::parser {
@@ -517,6 +519,92 @@ private:
 };
 // NOLINTEND(misc-no-recursion)
 
+//===----------------------------------------------------------------------===//
+// Pretty-printing
+//===----------------------------------------------------------------------===//
+
+const char* binaryOpSpelling(BinaryOp op) {
+  switch (op) {
+  case BinaryOp::Eq:
+    return "==";
+  case BinaryOp::Ne:
+    return "!=";
+  case BinaryOp::Lt:
+    return "<";
+  case BinaryOp::Le:
+    return "<=";
+  case BinaryOp::Gt:
+    return ">";
+  case BinaryOp::Ge:
+    return ">=";
+  case BinaryOp::Add:
+    return "+";
+  case BinaryOp::Sub:
+    return "-";
+  case BinaryOp::Mul:
+    return "*";
+  case BinaryOp::Div:
+    return "/";
+  case BinaryOp::Mod:
+    return "%";
+  case BinaryOp::LogicalAnd:
+    return "&&";
+  case BinaryOp::LogicalOr:
+    return "||";
+  }
+  return "?";
+}
+
+const char* unaryOpSpelling(UnaryOp op) {
+  switch (op) {
+  case UnaryOp::Neg:
+    return "-";
+  case UnaryOp::Not:
+    return "!";
+  }
+  return "?";
+}
+
+// Expression printing recurses through nested Binary / Unary nodes.
+// NOLINTBEGIN(misc-no-recursion)
+void printExpr(std::ostringstream& out, const Expr& expr) {
+  std::visit(
+      [&out](const auto& node) {
+        using T = std::decay_t<decltype(node)>;
+        if constexpr (std::is_same_v<T, Identifier>) {
+          out << node.name;
+        } else if constexpr (std::is_same_v<T, IntLiteral>) {
+          out << node.text;
+        } else if constexpr (std::is_same_v<T, ResultExpr>) {
+          out << "\\result";
+        } else if constexpr (std::is_same_v<T, BinaryExpr>) {
+          out << "(" << binaryOpSpelling(node.op) << " ";
+          printExpr(out, *node.lhs);
+          out << " ";
+          printExpr(out, *node.rhs);
+          out << ")";
+        } else if constexpr (std::is_same_v<T, UnaryExpr>) {
+          out << "(" << unaryOpSpelling(node.op) << " ";
+          printExpr(out, *node.operand);
+          out << ")";
+        }
+      },
+      expr.node);
+}
+// NOLINTEND(misc-no-recursion)
+
+const char* clauseKindSpelling(ClauseKind kind) {
+  switch (kind) {
+  case ClauseKind::Requires:
+    return "requires";
+  case ClauseKind::Ensures:
+    return "ensures";
+  case ClauseKind::AssignsNothing:
+    return "assigns \\nothing";
+  }
+  return "?";
+}
+
 } // namespace
 
 //===----------------------------------------------------------------------===//
@@ -532,8 +620,20 @@ ParseResult parseContract(std::string_view input) {
   return result;
 }
 
-std::string toString(const Expr& /*expr*/) { return {}; }
+std::string toString(const Expr& expr) {
+  std::ostringstream out;
+  printExpr(out, expr);
+  return out.str();
+}
 
-std::string toString(const Clause& /*clause*/) { return {}; }
+std::string toString(const Clause& clause) {
+  std::ostringstream out;
+  out << "[" << clause.index << "] " << clauseKindSpelling(clause.kind);
+  if (clause.predicate) {
+    out << " ";
+    printExpr(out, *clause.predicate);
+  }
+  return out.str();
+}
 
 } // namespace arcanum::parser
