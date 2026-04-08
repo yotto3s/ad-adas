@@ -13,7 +13,7 @@
 #include "mlir/IR/DialectRegistry.h"
 #include "mlir/Tools/mlir-opt/MlirOptMain.h"
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   mlir::DialectRegistry registry;
   registry.insert<mlir::arith::ArithDialect, mlir::scf::SCFDialect,
                   ecsl::ECSLDialect, testgen::TestGenDialect>();

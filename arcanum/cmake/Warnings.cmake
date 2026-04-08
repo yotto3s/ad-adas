@@ -19,6 +19,17 @@ set(ARCANUM_WARNING_FLAGS
   # We target C++17, so C++98-compat complaints are noise.
   -Wno-c++98-compat
   -Wno-c++98-compat-pedantic
+
+  # -Wswitch-default demands a `default:` label on every switch, even
+  # ones that already cover every enumerator; that contradicts the
+  # more useful -Wcovered-switch-default, which flags unreachable
+  # default labels. Keep the latter, drop the former.
+  -Wno-switch-default
+
+  # -Wpadded fires on any struct the compiler pads for alignment,
+  # which is essentially every non-trivial struct on x86-64. LLVM and
+  # most modern C++ codebases disable it.
+  -Wno-padded
 )
 
 add_compile_options(${ARCANUM_WARNING_FLAGS})

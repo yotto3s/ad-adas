@@ -10,7 +10,7 @@
 int main() {
   mlir::MLIRContext ctx;
   ctx.loadDialect<ecsl::ECSLDialect>();
-  const mlir::Dialect *dialect = ctx.getOrLoadDialect("ecsl");
+  const mlir::Dialect* dialect = ctx.getOrLoadDialect("ecsl");
   if (dialect == nullptr) {
     llvm::errs() << "failed to load ecsl dialect\n";
     return 1;

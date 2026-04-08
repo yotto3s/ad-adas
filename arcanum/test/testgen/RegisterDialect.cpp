@@ -10,7 +10,7 @@
 int main() {
   mlir::MLIRContext ctx;
   ctx.loadDialect<testgen::TestGenDialect>();
-  const mlir::Dialect *dialect = ctx.getOrLoadDialect("testgen");
+  const mlir::Dialect* dialect = ctx.getOrLoadDialect("testgen");
   if (dialect == nullptr) {
     llvm::errs() << "failed to load testgen dialect\n";
     return 1;
