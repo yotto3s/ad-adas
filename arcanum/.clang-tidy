@@ -14,6 +14,11 @@ WarningsAsErrors: ''
 HeaderFilterRegex: '(ecsl|parser|testgen|verify|tools)/.*\.h$'
 
 CheckOptions:
+  # Plain data structs with all-public members are idiomatic; don't
+  # demand private fields + getters/setters on them.
+  - key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+    value: 'true'
+
   # --- Types: CamelCase (LLVM standard) ---
   - key: readability-identifier-naming.ClassCase
     value: CamelCase

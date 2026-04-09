@@ -27,15 +27,15 @@ namespace ecsl {
 namespace {
 
 /// Returns true if \p op is one of the ecsl.constraint.* ops.
-bool isConstraintOp(const ::mlir::Operation *op) {
+bool isConstraintOp(const ::mlir::Operation* op) {
   return (op != nullptr) && ::mlir::isa<ConstraintCmpOp, ConstraintNotOp,
                                         ConstraintAndOp, ConstraintOrOp>(op);
 }
 
 /// Shared verifier for ConstraintAndOp / ConstraintOrOp bodies.
-::mlir::LogicalResult verifyConstraintNaryBody(::mlir::Operation *parent,
-                                               ::mlir::Block &block) {
-  for (::mlir::Operation &innerOp : block) {
+::mlir::LogicalResult verifyConstraintNaryBody(::mlir::Operation* parent,
+                                               ::mlir::Block& block) {
+  for (::mlir::Operation& innerOp : block) {
     for (const ::mlir::Value result : innerOp.getResults()) {
       if (result.getType().isInteger(1) && !isConstraintOp(&innerOp)) {
         return parent->emitOpError(
@@ -53,7 +53,7 @@ bool isConstraintOp(const ::mlir::Operation *op) {
 ::mlir::LogicalResult FuncOp::verify() {
   const ::mlir::FunctionType fnType = getFunctionType();
   const ::mlir::TypeRange expectedResults = fnType.getResults();
-  for (::mlir::Block &block : getBody()) {
+  for (::mlir::Block& block : getBody()) {
     auto retOp = ::mlir::dyn_cast<ReturnOp>(block.getTerminator());
     if (!retOp) {
       continue;
@@ -70,7 +70,7 @@ bool isConstraintOp(const ::mlir::Operation *op) {
 
 ::mlir::LogicalResult ReturnOp::verify() {
   auto funcOp = (*this)->getParentOfType<FuncOp>();
-  const ::mlir::Region *parentRegion = (*this)->getParentRegion();
+  const ::mlir::Region* parentRegion = (*this)->getParentRegion();
   if (parentRegion != &funcOp.getBody()) {
     return emitOpError("only allowed in the body region of ecsl.func");
   }
@@ -79,7 +79,7 @@ bool isConstraintOp(const ::mlir::Operation *op) {
 
 ::mlir::LogicalResult ClauseYieldOp::verify() {
   auto funcOp = (*this)->getParentOfType<FuncOp>();
-  const ::mlir::Region *parentRegion = (*this)->getParentRegion();
+  const ::mlir::Region* parentRegion = (*this)->getParentRegion();
   if (parentRegion == &funcOp.getBody()) {
     return emitOpError(
         "not allowed in the body region of ecsl.func; use ecsl.return");
@@ -142,7 +142,7 @@ bool isConstraintOp(const ::mlir::Operation *op) {
 }
 
 ::mlir::LogicalResult
-CallOp::verifySymbolUses(::mlir::SymbolTableCollection &symbolTable) {
+CallOp::verifySymbolUses(::mlir::SymbolTableCollection& symbolTable) {
   auto callee =
       symbolTable.lookupNearestSymbolFrom<FuncOp>(*this, getCalleeAttr());
   if (!callee) {
