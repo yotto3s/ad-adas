@@ -86,7 +86,7 @@ public:
 private:
   Token lexOne() {
     if (atEnd()) {
-      return makeToken(TokKind::Eof, "", loc);
+      return Token{TokKind::Eof, "", loc};
     }
     const SourceLoc start = loc;
     const char c = peek();
@@ -116,15 +116,15 @@ private:
       advance();
     }
     if (text == "requires") {
-      return makeToken(TokKind::KwRequires, std::move(text), start);
+      return Token{TokKind::KwRequires, std::move(text), start};
     }
     if (text == "ensures") {
-      return makeToken(TokKind::KwEnsures, std::move(text), start);
+      return Token{TokKind::KwEnsures, std::move(text), start};
     }
     if (text == "assigns") {
-      return makeToken(TokKind::KwAssigns, std::move(text), start);
+      return Token{TokKind::KwAssigns, std::move(text), start};
     }
-    return makeToken(TokKind::Ident, std::move(text), start);
+    return Token{TokKind::Ident, std::move(text), start};
   }
 
   Token lexInteger(SourceLoc start) {
@@ -134,7 +134,7 @@ private:
       text.push_back(peek());
       advance();
     }
-    return makeToken(TokKind::IntLit, std::move(text), start);
+    return Token{TokKind::IntLit, std::move(text), start};
   }
 
   Token lexBackslashKeyword(SourceLoc start) {
@@ -151,13 +151,12 @@ private:
       advance();
     }
     if (text == "result") {
-      return makeToken(TokKind::KwResult, "\\result", start);
+      return Token{TokKind::KwResult, "\\result", start};
     }
     if (text == "nothing") {
-      return makeToken(TokKind::KwNothing, "\\nothing", start);
+      return Token{TokKind::KwNothing, "\\nothing", start};
     }
-    return makeToken(TokKind::Error, "unknown backslash keyword: \\" + text,
-                  start);
+    return Token{TokKind::Error, "unknown backslash keyword: \\" + text, start};
   }
 
   Token lexOperatorOrPunct(SourceLoc start) {
@@ -165,67 +164,67 @@ private:
     advance();
     switch (c) {
     case '(':
-      return makeToken(TokKind::LParen, "(", start);
+      return Token{TokKind::LParen, "(", start};
     case ')':
-      return makeToken(TokKind::RParen, ")", start);
+      return Token{TokKind::RParen, ")", start};
     case ';':
-      return makeToken(TokKind::Semi, ";", start);
+      return Token{TokKind::Semi, ";", start};
     case '+':
-      return makeToken(TokKind::Plus, "+", start);
+      return Token{TokKind::Plus, "+", start};
     case '-':
-      return makeToken(TokKind::Minus, "-", start);
+      return Token{TokKind::Minus, "-", start};
     case '*':
-      return makeToken(TokKind::Star, "*", start);
+      return Token{TokKind::Star, "*", start};
     case '/':
-      return makeToken(TokKind::Slash, "/", start);
+      return Token{TokKind::Slash, "/", start};
     case '%':
-      return makeToken(TokKind::Percent, "%", start);
+      return Token{TokKind::Percent, "%", start};
     case '=':
       if (!atEnd() && peek() == '=') {
         advance();
-        return makeToken(TokKind::EqEq, "==", start);
+        return Token{TokKind::EqEq, "==", start};
       }
-      return makeToken(TokKind::Error, "unexpected '='", start);
+      return Token{TokKind::Error, "unexpected '='", start};
     case '!':
       if (!atEnd() && peek() == '=') {
         advance();
-        return makeToken(TokKind::BangEq, "!=", start);
+        return Token{TokKind::BangEq, "!=", start};
       }
-      return makeToken(TokKind::Bang, "!", start);
+      return Token{TokKind::Bang, "!", start};
     case '<':
       if (!atEnd() && peek() == '=') {
         advance();
-        return makeToken(TokKind::Le, "<=", start);
+        return Token{TokKind::Le, "<=", start};
       }
-      return makeToken(TokKind::Lt, "<", start);
+      return Token{TokKind::Lt, "<", start};
     case '>':
       if (!atEnd() && peek() == '=') {
         advance();
-        return makeToken(TokKind::Ge, ">=", start);
+        return Token{TokKind::Ge, ">=", start};
       }
-      return makeToken(TokKind::Gt, ">", start);
+      return Token{TokKind::Gt, ">", start};
     case '&':
       if (!atEnd() && peek() == '&') {
         advance();
-        return makeToken(TokKind::AmpAmp, "&&", start);
+        return Token{TokKind::AmpAmp, "&&", start};
       }
-      return makeToken(TokKind::Error, "unexpected '&'", start);
+      return Token{TokKind::Error, "unexpected '&'", start};
     case '|':
       if (!atEnd() && peek() == '|') {
         advance();
-        return makeToken(TokKind::PipePipe, "||", start);
+        return Token{TokKind::PipePipe, "||", start};
       }
-      return makeToken(TokKind::Error, "unexpected '|'", start);
+      return Token{TokKind::Error, "unexpected '|'", start};
     default:
-      return makeToken(TokKind::Error,
-                    std::string("unexpected character: '") + c + "'", start);
+      return Token{TokKind::Error,
+                   std::string("unexpected character: '") + c + "'", start};
     }
   }
 
   void skipWhitespace() {
     while (!atEnd()) {
       const char c = peek();
-      if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
+      if (!isWhitespace(c)) {
         break;
       }
       advance();
@@ -239,7 +238,7 @@ private:
     if (atEnd()) {
       return;
     }
-    if (input[pos] == '\n') {
+    if (isNewline(input[pos])) {
       ++loc.line;
       loc.col = 1;
     } else {
@@ -248,12 +247,12 @@ private:
     ++pos;
   }
 
-  [[nodiscard]] static Token makeToken(TokKind kind, std::string text, SourceLoc loc) {
-    Token tok;
-    tok.kind = kind;
-    tok.text = std::move(text);
-    tok.loc = loc;
-    return tok;
+  [[nodiscard]] static bool isWhitespace(const char c) noexcept {
+    return c == ' ' || c == '\t' || isNewline(c);
+  }
+
+  [[nodiscard]] static bool isNewline(const char c) noexcept {
+    return c == '\n' || c == '\r';
   }
 
   std::string_view input;
@@ -272,7 +271,7 @@ ParseResult parseContract(std::string_view input) {
   Lexer lexer(input);
   const auto tokens = lexer.tokenize(result.errors);
   std::ignore = tokens;
-  //TODO: implement parsing here
+  // TODO: implement parsing here
   return result;
 }
 
